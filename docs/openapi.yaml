@@ -1,0 +1,39 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: ContactBD
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  description: ContactBD is a web application for managing and organizing personal contacts.
+  Users can create, read, update, and delete contacts, which are stored in a
+  MongoDB database. The application provides RESTful API endpoints for interacting
+  with contact data, including authentication and authorization using Bearer tokens.
+
+tags:
+  # теги, що ви будете використовувати
+
+servers:
+  - url: http://localhost:3000
+  - url: #посилання на задеплоєний сайт
+
+paths:
+  /contacts/{contactId}:
+    get:
+      $ref: './swagger/paths/contacts/{id}/get.yaml'
+    patch:
+      $ref: './swagger/paths/contacts/{id}/patch.yaml'
+    delete:
+      $ref: './swagger/paths/contacts/{id}/delete.yaml'
+
+  /contacts:
+    get:
+      $ref: './swagger/paths/contacts/get.yaml'
+    post:
+      $ref: './swagger/paths/contacts/post.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

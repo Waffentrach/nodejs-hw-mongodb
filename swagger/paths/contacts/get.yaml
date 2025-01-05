@@ -1,0 +1,14 @@
+tags:
+  - Contacts
+summary: Get all contacts
+operationId: getAllContacts
+description: This endpoint retrieves a list of all contacts.
+responses:
+  200:
+    description: Successfully retrieved the contacts list
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
