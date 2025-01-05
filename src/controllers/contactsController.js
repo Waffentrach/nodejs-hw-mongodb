@@ -5,8 +5,13 @@ import {
   updateContact as updateContactService,
   deleteContact as deleteContactService,
 } from '../services/contacts.js';
+import { cloudinary } from '../utils/cloudinary.js';
 import httpErrors from 'http-errors';
 import ctrlWrapper from '../utils/ctrlWrapper.js';
+
+import dotenv from 'dotenv';
+dotenv.config();
+console.log('Cloudinary Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
 
 export const getContacts = ctrlWrapper(async (req, res) => {
   const {
@@ -72,21 +77,36 @@ export const getContactById = ctrlWrapper(async (req, res) => {
 });
 
 export const createNewContact = ctrlWrapper(async (req, res) => {
-  const { name, phoneNumber, email, isFavourite, contactType } = req.body;
+  const { name, phoneNumber, email, contactType } = req.body || {};
+  const { file } = req;
 
   if (!name || !phoneNumber || !contactType) {
-    throw httpErrors(400, 'Missing required fields');
+    throw httpErrors(
+      400,
+      'Missing required fields: name, phoneNumber, or contactType',
+    );
   }
 
   const userId = req.user._id;
+
+  let imageUrl = null;
+
+  if (file) {
+    try {
+      const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+      imageUrl = uploadResult.secure_url;
+    } catch (error) {
+      throw httpErrors(500, 'Failed to upload image to Cloudinary');
+    }
+  }
 
   const newContact = await createContact({
     name,
     phoneNumber,
     email,
-    isFavourite,
     contactType,
     userId,
+    imageUrl,
   });
 
   res.status(201).json({
@@ -98,12 +118,27 @@ export const createNewContact = ctrlWrapper(async (req, res) => {
 
 export const updateContact = ctrlWrapper(async (req, res) => {
   const { contactId } = req.params;
-  const updatedData = req.body;
+  const updatedData = req.body || {};
+  const { file } = req;
   const userId = req.user._id;
+
+  let imageUrl = updatedData.imageUrl;
+
+  if (file) {
+    try {
+      const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+      imageUrl = uploadResult.secure_url;
+    } catch (error) {
+      throw httpErrors(500, 'Failed to upload image to Cloudinary');
+    }
+  }
 
   const updatedContact = await updateContactService(
     contactId,
-    updatedData,
+    {
+      ...updatedData,
+      imageUrl,
+    },
     userId,
   );
 
