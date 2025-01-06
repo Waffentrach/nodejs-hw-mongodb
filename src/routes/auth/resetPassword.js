@@ -19,6 +19,7 @@ router.post(
       try {
         decoded = jwt.verify(token, process.env.JWT_SECRET);
       } catch (error) {
+        console.error(error);
         throw createHttpError(401, 'Token is expired or invalid.');
       }
 
