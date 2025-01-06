@@ -19,3 +19,5 @@ export const uploadPhoto = async (filePath) => {
     throw new Error('Failed to upload image to Cloudinary');
   }
 };
+
+export { cloudinary };
