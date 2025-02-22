@@ -1,9 +1,11 @@
 import { writeContacts } from '../utils/writeContacts.js';
+export async function removeAllContacts() {
+  try {
+    await writeContacts([]);
+    console.log('All contacts removed');
+  } catch (error) {
+    console.error('Error removing all contacts:', error);
+  }
+}
 
-export const removeAllContacts = async () => {
-  const emptyContacts = [];
-
-  await writeContacts(emptyContacts);
-
-  console.log('All contacts have been removed!');
-};
+removeAllContacts();
