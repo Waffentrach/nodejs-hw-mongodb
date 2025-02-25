@@ -31,7 +31,11 @@ export const getContactById = ctrlWrapper(async (req, res) => {
     const contact = await fetchContactById(contactId);
 
     if (!contact) {
-      throw httpErrors(404, 'Contact not found');
+      return res.status(404).json({
+        status: 404,
+        message: `Contact with id ${contactId} not found`,
+        data: null,
+      });
     }
 
     res.status(200).json({
@@ -40,12 +44,6 @@ export const getContactById = ctrlWrapper(async (req, res) => {
       data: contact,
     });
   } catch (err) {
-    if (err.status === 404) {
-      return res.status(404).json({
-        status: 404,
-        message: err.message,
-      });
-    }
     res.status(500).json({
       status: 500,
       message: 'Internal Server Error',
@@ -98,7 +96,11 @@ export const updateContact = ctrlWrapper(async (req, res) => {
     const updatedContact = await updateContactById(contactId, updatedData);
 
     if (!updatedContact) {
-      throw httpErrors(404, 'Contact not found');
+      return res.status(404).json({
+        status: 404,
+        message: `Contact with id ${contactId} not found`,
+        data: null,
+      });
     }
 
     res.status(200).json({
@@ -107,12 +109,6 @@ export const updateContact = ctrlWrapper(async (req, res) => {
       data: updatedContact,
     });
   } catch (err) {
-    if (err.status === 404) {
-      return res.status(404).json({
-        status: 404,
-        message: err.message,
-      });
-    }
     res.status(500).json({
       status: 500,
       message: 'Internal Server Error',
@@ -128,17 +124,15 @@ export const deleteContact = ctrlWrapper(async (req, res) => {
     const deletedContact = await deleteContactById(contactId);
 
     if (!deletedContact) {
-      throw httpErrors(404, 'Contact not found');
+      return res.status(404).json({
+        status: 404,
+        message: `Contact with id ${contactId} not found`,
+        data: null,
+      });
     }
 
     res.status(204).send();
   } catch (err) {
-    if (err.status === 404) {
-      return res.status(404).json({
-        status: 404,
-        message: err.message,
-      });
-    }
     res.status(500).json({
       status: 500,
       message: 'Internal Server Error',
