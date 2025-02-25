@@ -1,7 +1,39 @@
 import Contact from '../db/models/contacts.js';
 
-export const getAllContacts = () => {
-  return Contact.find().exec();
+export const getAllContacts = async ({
+  page = 1,
+  perPage = 10,
+  name,
+  isFavourite,
+  contactType,
+}) => {
+  const limit = Number(perPage);
+  const skip = (Number(page) - 1) * limit;
+
+  const query = {};
+
+  if (name) {
+    query.name = { $regex: name, $options: 'i' };
+  }
+
+  if (typeof isFavourite !== 'undefined') {
+    query.isFavourite = isFavourite === 'true';
+  }
+
+  if (contactType) {
+    query.contactType = contactType;
+  }
+
+  const totalContactsCount = await Contact.countDocuments(query);
+
+  const contacts = await Contact.find(query).skip(skip).limit(limit).exec();
+
+  return {
+    data: contacts,
+    total: totalContactsCount,
+    page: Number(page),
+    perPage: Number(perPage),
+  };
 };
 
 export const countAllContacts = async () => {

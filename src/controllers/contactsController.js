@@ -14,36 +14,44 @@ export const getContacts = ctrlWrapper(async (req, res) => {
     perPage = 10,
     sortBy = 'name',
     sortOrder = 'asc',
+    name,
+    isFavourite,
+    contactType,
   } = req.query;
 
   const pageNumber = parseInt(page, 10);
   const itemsPerPage = parseInt(perPage, 10);
   const sortDirection = sortOrder === 'desc' ? -1 : 1;
 
+  const filter = {};
+
+  if (name) {
+    filter.name = { $regex: name, $options: 'i' };
+  }
+
+  if (isFavourite !== undefined) {
+    filter.isFavourite = isFavourite === 'true';
+  }
+
+  if (contactType) {
+    filter.contactType = contactType;
+  }
+
   try {
-    const contacts = await getAllContacts();
-    console.log(contacts);
+    const contacts = await getAllContacts({
+      page: pageNumber,
+      perPage: itemsPerPage,
+      filter,
+      sort: { [sortBy]: sortDirection },
+    });
 
-    if (!Array.isArray(contacts)) {
-      throw new Error('Contacts data is not an array.');
-    }
-
-    const totalItems = contacts.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    const sortedContacts = contacts
-      .sort((a, b) => {
-        if (a[sortBy] < b[sortBy]) return sortDirection * -1;
-        if (a[sortBy] > b[sortBy]) return sortDirection;
-        return 0;
-      })
-      .slice((pageNumber - 1) * itemsPerPage, pageNumber * itemsPerPage);
+    const { data, totalItems, totalPages } = contacts;
 
     return res.status(200).json({
       status: 200,
       message: 'Successfully found contacts!',
       data: {
-        data: sortedContacts,
+        data,
         page: pageNumber,
         perPage: itemsPerPage,
         totalItems,
