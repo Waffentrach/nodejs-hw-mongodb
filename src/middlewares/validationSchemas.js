@@ -6,7 +6,7 @@ export const contactValidationSchema = Joi.object({
   email: Joi.string().email().optional(),
   isFavourite: Joi.boolean().optional(),
   contactType: Joi.string().min(3).max(20).required(),
-}).unknown(true);
+}).or('name', 'phoneNumber', 'email', 'isFavourite', 'contactType');
 
 export const loginValidationSchema = Joi.object({
   email: Joi.string().email().required(),
