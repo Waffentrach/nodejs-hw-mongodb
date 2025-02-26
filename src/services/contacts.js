@@ -17,14 +17,13 @@ export const createContact = async ({
   isFavourite,
   contactType,
 }) => {
-  const contact = new Contact({
+  const contact = await Contact.create({
     name,
     phoneNumber,
     email,
     isFavourite,
     contactType,
   });
-  await contact.save();
   return contact;
 };
 

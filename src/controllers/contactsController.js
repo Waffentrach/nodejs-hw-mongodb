@@ -26,30 +26,18 @@ export const getContacts = ctrlWrapper(async (req, res) => {
 });
 
 export const getContactById = ctrlWrapper(async (req, res) => {
-  try {
-    const { contactId } = req.params;
-    const contact = await fetchContactById(contactId);
+  const { contactId } = req.params;
+  const contact = await fetchContactById(contactId);
 
-    if (!contact) {
-      return res.status(404).json({
-        status: 404,
-        message: `Contact with id ${contactId} not found`,
-        data: null,
-      });
-    }
-
-    res.status(200).json({
-      status: 200,
-      message: `Successfully found contact with id ${contactId}!`,
-      data: contact,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 500,
-      message: 'Internal Server Error',
-      error: err.message,
-    });
+  if (!contact) {
+    throw createHttpError(404, 'Student not found');
   }
+
+  res.status(200).json({
+    status: 200,
+    message: `Successfully found contact with id ${contactId}!`,
+    data: contact,
+  });
 });
 
 export const createNewContact = ctrlWrapper(async (req, res) => {
