@@ -22,14 +22,14 @@ router.get('/:contactId', isValidId, ctrlWrapper(getContactById));
 
 router.post(
   '/',
-  validateBody(updateContactSchema, createContactSchema),
+  validateBody(createContactSchema),
   ctrlWrapper(createNewContact),
 );
 
 router.patch(
   '/:contactId',
   isValidId,
-  validateBody(updateContactSchema, createContactSchema),
+  validateBody(updateContactSchema),
   ctrlWrapper(updateContact),
 );
 

@@ -6,9 +6,8 @@ import {
   deleteContactById,
 } from '../services/contacts.js';
 import HttpErrors from 'http-errors';
-import ctrlWrapper from '../utils/ctrlWrapper.js';
 
-export const getContacts = ctrlWrapper(async (req, res) => {
+export const getContacts = async (req, res) => {
   const {
     page = 1,
     perPage = 10,
@@ -60,9 +59,9 @@ export const getContacts = ctrlWrapper(async (req, res) => {
       hasNextPage,
     },
   });
-});
+};
 
-export const getContactById = ctrlWrapper(async (req, res) => {
+export const getContactById = async (req, res) => {
   const { contactId } = req.params;
   const contact = await fetchContactById(contactId);
 
@@ -75,9 +74,9 @@ export const getContactById = ctrlWrapper(async (req, res) => {
     message: `Successfully found contact with id ${contactId}!`,
     data: contact,
   });
-});
+};
 
-export const createNewContact = ctrlWrapper(async (req, res) => {
+export const createNewContact = async (req, res) => {
   const { name, phoneNumber, email, isFavourite, contactType } = req.body;
 
   const newContact = await createContact({
@@ -97,9 +96,9 @@ export const createNewContact = ctrlWrapper(async (req, res) => {
     message: 'Successfully created a contact!',
     data: newContact,
   });
-});
+};
 
-export const updateContact = ctrlWrapper(async (req, res) => {
+export const updateContact = async (req, res) => {
   const { contactId } = req.params;
   const updatedData = req.body;
 
@@ -114,9 +113,9 @@ export const updateContact = ctrlWrapper(async (req, res) => {
     message: 'Successfully updated contact!',
     data: updatedContact,
   });
-});
+};
 
-export const deleteContact = ctrlWrapper(async (req, res) => {
+export const deleteContact = async (req, res) => {
   const { contactId } = req.params;
 
   const deletedContact = await deleteContactById(contactId);
@@ -126,4 +125,4 @@ export const deleteContact = ctrlWrapper(async (req, res) => {
   }
 
   res.status(204).send();
-});
+};
