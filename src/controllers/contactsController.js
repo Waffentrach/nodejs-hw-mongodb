@@ -5,7 +5,7 @@ import {
   updateContactById,
   deleteContactById,
 } from '../services/contacts.js';
-import httpErrors from 'http-errors';
+import HttpErrors from 'http-errors';
 import ctrlWrapper from '../utils/ctrlWrapper.js';
 
 export const getContacts = ctrlWrapper(async (req, res) => {
@@ -19,8 +19,8 @@ export const getContacts = ctrlWrapper(async (req, res) => {
     contactType,
   } = req.query;
 
-  const pageNumber = parseInt(page, 10);
-  const itemsPerPage = parseInt(perPage, 10);
+  const pageNumber = parseInt(page, 10) || 1;
+  const itemsPerPage = parseInt(perPage, 10) || 10;
   const sortDirection = sortOrder === 'desc' ? -1 : 1;
 
   const filter = {};
@@ -37,36 +37,29 @@ export const getContacts = ctrlWrapper(async (req, res) => {
     filter.contactType = contactType;
   }
 
-  try {
-    const contacts = await getAllContacts({
+  const contacts = await getAllContacts({
+    page: pageNumber,
+    perPage: itemsPerPage,
+    filter,
+    sort: { [sortBy]: sortDirection },
+  });
+
+  const { data, totalItems, totalPages, hasPreviousPage, hasNextPage } =
+    contacts;
+
+  return res.status(200).json({
+    status: 200,
+    message: 'Successfully found contacts!',
+    data: {
+      data,
       page: pageNumber,
       perPage: itemsPerPage,
-      filter,
-      sort: { [sortBy]: sortDirection },
-    });
-
-    const { data, totalItems, totalPages } = contacts;
-
-    return res.status(200).json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: {
-        data,
-        page: pageNumber,
-        perPage: itemsPerPage,
-        totalItems,
-        totalPages,
-        hasPreviousPage: pageNumber > 1,
-        hasNextPage: pageNumber < totalPages,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: 500,
-      message: error.message,
-    });
-  }
+      totalItems,
+      totalPages,
+      hasPreviousPage,
+      hasNextPage,
+    },
+  });
 });
 
 export const getContactById = ctrlWrapper(async (req, res) => {
@@ -74,7 +67,7 @@ export const getContactById = ctrlWrapper(async (req, res) => {
   const contact = await fetchContactById(contactId);
 
   if (!contact) {
-    throw httpErrors(404, 'Contact not found');
+    throw HttpErrors(404, 'Contact not found');
   }
 
   res.status(200).json({
@@ -95,6 +88,10 @@ export const createNewContact = ctrlWrapper(async (req, res) => {
     contactType,
   });
 
+  if (!newContact) {
+    throw HttpErrors(400, 'Failed to create contact');
+  }
+
   res.status(201).json({
     status: 201,
     message: 'Successfully created a contact!',
@@ -109,7 +106,7 @@ export const updateContact = ctrlWrapper(async (req, res) => {
   const updatedContact = await updateContactById(contactId, updatedData);
 
   if (!updatedContact) {
-    throw httpErrors(404, 'Contact not found');
+    throw HttpErrors(404, `Contact with id ${contactId} not found`);
   }
 
   res.status(200).json({
@@ -125,7 +122,7 @@ export const deleteContact = ctrlWrapper(async (req, res) => {
   const deletedContact = await deleteContactById(contactId);
 
   if (!deletedContact) {
-    throw httpErrors(404, 'Contact not found');
+    throw HttpErrors(404, `Contact with id ${contactId} not found`);
   }
 
   res.status(204).send();

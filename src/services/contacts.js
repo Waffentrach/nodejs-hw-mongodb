@@ -3,36 +3,31 @@ import Contact from '../db/models/contacts.js';
 export const getAllContacts = async ({
   page = 1,
   perPage = 10,
-  name,
-  isFavourite,
-  contactType,
+  filter = {},
+  sort = {},
 }) => {
   const limit = Number(perPage);
   const skip = (Number(page) - 1) * limit;
 
-  const query = {};
+  const totalContactsCount = await Contact.countDocuments(filter);
 
-  if (name) {
-    query.name = { $regex: name, $options: 'i' };
-  }
+  const contacts = await Contact.find(filter)
+    .skip(skip)
+    .limit(limit)
+    .sort(sort)
+    .collation({ locale: 'en', strength: 2 })
+    .exec();
 
-  if (typeof isFavourite !== 'undefined') {
-    query.isFavourite = isFavourite === 'true';
-  }
-
-  if (contactType) {
-    query.contactType = contactType;
-  }
-
-  const totalContactsCount = await Contact.countDocuments(query);
-
-  const contacts = await Contact.find(query).skip(skip).limit(limit).exec();
+  const totalPages = Math.ceil(totalContactsCount / limit);
 
   return {
     data: contacts,
-    total: totalContactsCount,
     page: Number(page),
-    perPage: Number(perPage),
+    perPage: limit,
+    totalItems: totalContactsCount,
+    totalPages: totalPages,
+    hasPreviousPage: page > 1,
+    hasNextPage: page < totalPages,
   };
 };
 
