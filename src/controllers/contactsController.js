@@ -87,10 +87,6 @@ export const getContactById = ctrlWrapper(async (req, res) => {
 export const createNewContact = ctrlWrapper(async (req, res) => {
   const { name, phoneNumber, email, isFavourite, contactType } = req.body;
 
-  if (!name || !phoneNumber || !contactType) {
-    throw httpErrors(400, 'Missing required fields');
-  }
-
   const newContact = await createContact({
     name,
     phoneNumber,
