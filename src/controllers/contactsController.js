@@ -11,10 +11,6 @@ import ctrlWrapper from '../utils/ctrlWrapper.js';
 export const getContacts = ctrlWrapper(async (req, res) => {
   const contacts = await getAllContacts();
 
-  if (!contacts || contacts.length === 0) {
-    throw createHttpError(404, 'No contacts found');
-  }
-
   res.status(200).json({
     status: 200,
     message: 'Successfully found contacts!',
