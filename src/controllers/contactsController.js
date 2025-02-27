@@ -6,9 +6,8 @@ import {
   deleteContact as deleteContactService,
 } from '../services/contacts.js';
 import httpErrors from 'http-errors';
-import ctrlWrapper from '../utils/ctrlWrapper.js';
 
-export const getContacts = ctrlWrapper(async (req, res) => {
+export const getContacts = async (req, res) => {
   const {
     page = 1,
     perPage = 10,
@@ -52,9 +51,9 @@ export const getContacts = ctrlWrapper(async (req, res) => {
       hasNextPage: pageNumber < totalPages,
     },
   });
-});
+};
 
-export const getContactById = ctrlWrapper(async (req, res) => {
+export const getContactById = async (req, res) => {
   const { contactId } = req.params;
   const userId = req.user._id;
 
@@ -69,14 +68,10 @@ export const getContactById = ctrlWrapper(async (req, res) => {
     message: `Successfully found contact with id ${contactId}!`,
     data: contact,
   });
-});
+};
 
-export const createNewContact = ctrlWrapper(async (req, res) => {
+export const createNewContact = async (req, res) => {
   const { name, phoneNumber, email, isFavourite, contactType } = req.body;
-
-  if (!name || !phoneNumber || !contactType) {
-    throw httpErrors(400, 'Missing required fields');
-  }
 
   const userId = req.user._id;
 
@@ -94,9 +89,9 @@ export const createNewContact = ctrlWrapper(async (req, res) => {
     message: 'Successfully created a contact!',
     data: newContact,
   });
-});
+};
 
-export const updateContact = ctrlWrapper(async (req, res) => {
+export const updateContact = async (req, res) => {
   const { contactId } = req.params;
   const updatedData = req.body;
   const userId = req.user._id;
@@ -116,9 +111,9 @@ export const updateContact = ctrlWrapper(async (req, res) => {
     message: 'Successfully updated contact!',
     data: updatedContact,
   });
-});
+};
 
-export const deleteContact = ctrlWrapper(async (req, res) => {
+export const deleteContact = async (req, res) => {
   const { contactId } = req.params;
   const userId = req.user._id;
 
@@ -129,4 +124,4 @@ export const deleteContact = ctrlWrapper(async (req, res) => {
   }
 
   res.status(204).send();
-});
+};
