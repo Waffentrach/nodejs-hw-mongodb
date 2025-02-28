@@ -34,8 +34,8 @@ export const loginUser = async (req, res, next) => {
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     res.status(200).json({
       status: 200,
-      message: 'Successfully logged in an user!',
-      data: { accessToken, refreshToken },
+      message: 'Successfully logged in!',
+      data: { accessToken },
     });
   } catch (error) {
     next(error);
@@ -49,8 +49,6 @@ export const refreshUserSession = async (req, res, next) => {
     if (!refreshToken) {
       throw createHttpError(401, 'Refresh token not found');
     }
-
-    console.log('Refresh Token:', refreshToken);
 
     const { accessToken, newRefreshToken } = await refreshService(refreshToken);
 
@@ -83,11 +81,4 @@ export const logoutUser = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-export default {
-  registerUser,
-  loginUser,
-  refreshUserSession,
-  logoutUser,
 };
