@@ -54,12 +54,7 @@ export const loginService = async (email, password) => {
 };
 
 export const refreshService = async (oldRefreshToken) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(oldRefreshToken, process.env.JWT_REFRESH_SECRET);
-  } catch (error) {
-    throw createHttpError(401, 'Invalid refresh token');
-  }
+  const decoded = jwt.verify(oldRefreshToken, process.env.JWT_REFRESH_SECRET);
 
   const existingSession = await Session.findOne({
     refreshToken: oldRefreshToken,
