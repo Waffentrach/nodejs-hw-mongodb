@@ -12,6 +12,7 @@ if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
   );
   throw new Error('JWT_SECRET and JWT_REFRESH_SECRET must be defined in .env');
 }
+
 export const registerService = async (name, email, password) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -90,7 +91,7 @@ export const refreshService = async (oldRefreshToken) => {
   });
   await newSession.save();
 
-  return { accessToken: newAccessToken, newRefreshToken };
+  return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 
 export const logoutService = async (refreshToken) => {

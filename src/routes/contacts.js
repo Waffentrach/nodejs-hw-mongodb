@@ -8,7 +8,11 @@ import {
 } from '../controllers/contactsController.js';
 import ctrlWrapper from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validation.js';
-import { contactValidationSchema } from '../middlewares/validationSchemas.js';
+import {
+  createContactSchema,
+  updateContactSchema,
+} from '../middlewares/validationSchemas.js';
+
 import { isValidId } from '../middlewares/isValidId.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { upload } from '../middlewares/upload.js';
@@ -16,29 +20,23 @@ import { uploadPhoto } from '../utils/cloudinary.js';
 
 const router = express.Router();
 
-router.get('/', authenticate, ctrlWrapper(getContacts));
+router.use(authenticate);
 
-router.get('/:contactId', isValidId, authenticate, ctrlWrapper(getContactById));
+router.get('/', ctrlWrapper(getContacts));
+router.get('/:contactId', isValidId, ctrlWrapper(getContactById));
 
 router.post(
   '/',
-  authenticate,
   upload.single('photo'),
-  validateBody(contactValidationSchema),
+  validateBody(createContactSchema),
   ctrlWrapper(async (req, res) => {
     const { name, email, phoneNumber, contactType } = req.body;
-    console.log('req.body:', req.body);
-    console.log('req.file:', req.file);
 
     if (!name || !phoneNumber || !contactType) {
-      console.log('Missing required fields:', {
-        name,
-        phoneNumber,
-        contactType,
-      });
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    let photo = '';
     if (req.file) {
       const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
       if (!allowedMimeTypes.includes(req.file.mimetype)) {
@@ -46,16 +44,11 @@ router.post(
           .status(400)
           .json({ message: 'Invalid file type. Only JPEG, PNG allowed.' });
       }
-
       if (req.file.size > 5 * 1024 * 1024) {
         return res
           .status(400)
           .json({ message: 'File size exceeds the limit of 5MB.' });
       }
-    }
-
-    let photo = '';
-    if (req.file) {
       try {
         photo = await uploadPhoto(req.file.path);
       } catch (error) {
@@ -65,29 +58,36 @@ router.post(
       }
     }
 
-    const newContact = await createNewContact(
-      { name, email, phoneNumber, photo },
-      req,
-      res,
-    );
-    res.status(201).json({
-      status: 201,
-      message: 'Successfully created a contact!',
-      data: newContact,
-    });
+    try {
+      const newContact = await createNewContact({
+        name,
+        email,
+        phoneNumber,
+        contactType,
+        photo,
+      });
+
+      return res.status(201).json({
+        status: 201,
+        message: 'Successfully created a contact!',
+        data: newContact,
+      });
+    } catch (error) {
+      console.error('Error creating contact:', error);
+      return res.status(500).json({ message: 'Something went wrong' });
+    }
   }),
 );
 
 router.patch(
   '/:contactId',
   isValidId,
-  authenticate,
   upload.single('photo'),
-  validateBody(contactValidationSchema),
+  validateBody(updateContactSchema),
   ctrlWrapper(async (req, res) => {
-    const { name, email, phone } = req.body;
-
+    const { name, email, phoneNumber } = req.body;
     let photo;
+
     if (req.file) {
       try {
         photo = await uploadPhoto(req.file.path);
@@ -99,10 +99,11 @@ router.patch(
     }
 
     const updatedContact = await updateContact(
-      { name, email, phone, photo },
+      { name, email, phoneNumber, ...(photo && { photo }) },
       req,
       res,
     );
+
     res.status(200).json({
       status: 200,
       message: 'Successfully updated contact!',
@@ -111,11 +112,6 @@ router.patch(
   }),
 );
 
-router.delete(
-  '/:contactId',
-  isValidId,
-  authenticate,
-  ctrlWrapper(deleteContact),
-);
+router.delete('/:contactId', isValidId, ctrlWrapper(deleteContact));
 
 export default router;
