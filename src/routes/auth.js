@@ -28,6 +28,7 @@ router.post(
   validateBody(resetPasswordSchema),
   sendResetPasswordEmail,
 );
+
 router.post(
   '/reset-password/confirm',
   validateBody(resetPasswordSchema),

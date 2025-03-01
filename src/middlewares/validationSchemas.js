@@ -37,6 +37,7 @@ export const registerValidationSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 export const resetPasswordSchema = Joi.object({
-  token: Joi.string().required(),
+  token: Joi.string().optional(),
+  email: Joi.string().email().optional(),
   newPassword: Joi.string().min(6).required(),
-});
+}).xor('token', 'email');

@@ -10,19 +10,21 @@ const router = express.Router();
 
 router.post(
   '/reset-pwd',
-  validateBody({ token: 'string', password: 'string' }),
+  validateBody({ email: 'string', token: 'string', password: 'string' }),
   async (req, res, next) => {
     try {
-      const { token, password } = req.body;
+      const { email, token, password } = req.body;
 
       let decoded;
       try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        decoded = jwt.verify(token, process.env.RESET_SECRET);
       } catch (error) {
         throw createHttpError(401, 'Token is expired or invalid.');
       }
 
-      const { email } = decoded;
+      if (!decoded.email || decoded.email !== email) {
+        throw createHttpError(403, 'Invalid token for this email.');
+      }
 
       const user = await User.findOne({ email });
       if (!user) {

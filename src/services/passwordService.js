@@ -28,14 +28,18 @@ export const sendResetEmail = async (email) => {
 export const resetPassword = async (token, newPassword) => {
   try {
     const decoded = jwt.verify(token, RESET_SECRET);
+    console.log('Decoded token id:', decoded.id);
+
     const user = await User.findById(decoded.id);
     if (!user) throw createHttpError(404, 'User not found');
+    console.log('Found user:', user);
 
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
     return { message: 'Password reset successful' };
   } catch (error) {
+    console.log('Reset password error:', error.message);
     throw createHttpError(400, 'Invalid or expired reset token');
   }
 };
